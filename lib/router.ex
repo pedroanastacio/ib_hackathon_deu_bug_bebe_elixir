@@ -1,11 +1,11 @@
 defmodule Router do
   use Plug.Router
 
-  plug :match
-  plug :dispatch
+  plug(:match)
+  plug(:dispatch)
 
-  forward "/users", to: UsersRouter
-  forward "/transactions", to: TransactionsRouter
+  forward("/users", to: UsersRouter)
+  forward("/transactions", to: TransactionsRouter)
 
   get "/" do
     send_resp(conn, 200, "Deu bug, bebe elixir!!!")

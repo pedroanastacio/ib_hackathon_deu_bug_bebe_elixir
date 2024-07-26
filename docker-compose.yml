@@ -1,5 +1,25 @@
+version: '3.8'
+
 services:
   ng:
     build: .
     ports:
-      - "3000:3000"
+      - '3000:3000'
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: 'ecto://codefest:codefest@db/codefest'
+
+  db:
+    image: postgres:9.6
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: codefest
+      POSTGRES_PASSWORD: codefest
+      POSTGRES_DB: codefest
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

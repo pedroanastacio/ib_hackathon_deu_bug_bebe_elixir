@@ -1,11 +1,15 @@
 defmodule UsersRouter do
   use Plug.Router
+  alias App.{Repo, User}
 
-  plug :match
-  plug :dispatch
+  plug(:match)
+  plug(:dispatch)
 
   get "/" do
-    send_resp(conn, 200, "List of users")
+    users = Repo.all(User)
+    users_json = Jason.encode!(users)
+
+    send_resp(conn, 200, users_json)
   end
 
   match "/", via: [:post, :patch, :put] do

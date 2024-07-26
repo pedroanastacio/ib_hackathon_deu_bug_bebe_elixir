@@ -1,8 +1,8 @@
 defmodule TransactionsRouter do
   use Plug.Router
 
-  plug :match
-  plug :dispatch
+  plug(:match)
+  plug(:dispatch)
 
   get "/" do
     send_resp(conn, 200, "List of transactions")

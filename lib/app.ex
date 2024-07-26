@@ -7,7 +7,8 @@ defmodule App do
     port = 3000
 
     children = [
-      {Plug.Cowboy, scheme: :http, plug: Router, options: [port: port]}
+      {Plug.Cowboy, scheme: :http, plug: Router, options: [port: port]},
+      App.Repo
     ]
 
     opts = [strategy: :one_for_one, name: App.Supervisor]

@@ -5,7 +5,7 @@ config :deu_bug_bebe_elixir_ng, App.Repo,
   password: "codefest",
   database: "codefest",
   # Quando rodar localmente, use "localhost"
-  hostname: "db",
+  hostname: "localhost",
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 

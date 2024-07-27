@@ -1,4 +1,4 @@
-defmodule App.Transaction do
+defmodule App.Domain.Transaction do
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -23,8 +23,8 @@ defmodule App.Transaction do
     field(:status, :string)
     field(:reason, :string)
 
-    belongs_to(:sender, App.User, type: :binary_id, foreign_key: :sender_id)
-    belongs_to(:receiver, App.User, type: :binary_id, foreign_key: :receiver_id)
+    belongs_to(:sender, App.Domain.User, type: :binary_id, foreign_key: :sender_id)
+    belongs_to(:receiver, App.Domain.User, type: :binary_id, foreign_key: :receiver_id)
 
     timestamps(inserted_at: :created_at)
   end

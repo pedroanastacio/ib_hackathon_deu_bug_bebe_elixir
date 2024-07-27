@@ -1,10 +1,11 @@
 defmodule App.Utils.Hash do
   def generate_hash(sender, receiver, amount, created_at, currency, public_key) do
-    {_, private_key} = generate_key()
+    private_key = Application.get_env(:deu_bug_bebe_elixir_ng, App.Repo)[:private_key]
+    decoded_private_key = Base.decode16!(private_key)
 
     data = "#{sender}#{receiver}#{amount}#{created_at}#{currency}#{public_key}"
 
-    signature = sign(private_key, data)
+    signature = sign(decoded_private_key, data)
 
     key = ExKeccak.hash_256(signature)
     Base.encode16(key)

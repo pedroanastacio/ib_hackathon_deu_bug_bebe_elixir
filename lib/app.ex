@@ -8,7 +8,8 @@ defmodule App do
 
     children = [
       {Plug.Cowboy, scheme: :http, plug: Router, options: [port: port]},
-      App.Repo
+      App.Repo,
+      RabbitMQConnectionSupervisor
     ]
 
     opts = [strategy: :one_for_one, name: App.Supervisor]

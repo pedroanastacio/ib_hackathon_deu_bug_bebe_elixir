@@ -15,7 +15,8 @@ defmodule DeuBugBebeElixirNg.MixProject do
   def application do
     [
       extra_applications: [:logger],
-      mod: {App, []}
+      mod: {App, []},
+      appications: [:amqp]
     ]
   end
 
@@ -25,7 +26,8 @@ defmodule DeuBugBebeElixirNg.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:jason, "~> 1.3"},
       {:ecto_sql, "~> 3.6"},
-      {:postgrex, ">= 0.0.0"}
+      {:postgrex, ">= 0.0.0"},
+      {:amqp, "~> 3.0.0"}
     ]
   end
 end

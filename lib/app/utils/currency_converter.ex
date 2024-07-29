@@ -1,10 +1,10 @@
 defmodule App.Utils.CurrencyConverter do
   @exchange_rates %{
-    "USD" => Decimal.new(1),
-    "BRL" => Decimal.div(Decimal.new(1), Decimal.new(5)),
-    "ETH" => Decimal.new(3000),
-    "BTC" => Decimal.new(60_000),
-    "IC" => Decimal.new(1_000_000)
+    "usd" => Decimal.new(1),
+    "br" => Decimal.div(Decimal.new(1), Decimal.new(5)),
+    "eth" => Decimal.new(3000),
+    "btc" => Decimal.new(60_000),
+    "ic" => Decimal.new(1_000_000)
   }
 
   @spec convert(float, String.t(), String.t()) :: {:ok, float} | {:error, String.t()}

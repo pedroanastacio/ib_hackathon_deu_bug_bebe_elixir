@@ -224,7 +224,7 @@ defmodule App.Service.Transaction do
 
         "review" ->
           Producer.publish_to_transactions(%{
-            event: "Transaction.CREATED",
+            event: "Transaction.Created",
             sender: payload.sender,
             receiver: payload.receiver,
             amount: payload.amount,

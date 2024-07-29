@@ -6,6 +6,7 @@ defmodule App.Service.Transaction do
   alias App.Domain.{Transaction, User}
   alias App.RabbitMQ.Producer
   alias App.Utils.{Hash, CurrencyConverter}
+  alias App.Transaction.Enums.Status
 
   alias Ecto.UUID
 
@@ -122,7 +123,31 @@ defmodule App.Service.Transaction do
   end
 
   defp create_transaction_pending(payload) do
-    Logger.info("Transaction pending: #{inspect(payload)}")
+    if Map.has_key?(payload, :reason) do
+      Logger.info("Transaction failed: #{inspect(payload.reason)}")
+    else
+      case payload.status do
+        "failed" ->
+          Logger.info("Transaction failed")
+
+        "review" ->
+          Producer.publish_to_transactions(%{
+            event: "Transaction.CREATED",
+            sender: payload.sender,
+            receiver: payload.receiver,
+            amount: payload.amount,
+            currency: payload.currency,
+            hash: payload.hash,
+            created_at: payload.created_at,
+            id: payload.id,
+            status: "success",
+            updated_at: payload.updated_at
+          })
+
+        _ ->
+          Logger.info("Invalid status")
+      end
+    end
   end
 
   defp publish_failure(payload, reason) do

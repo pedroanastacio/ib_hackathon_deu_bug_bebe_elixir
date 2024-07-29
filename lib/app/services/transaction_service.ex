@@ -125,12 +125,10 @@ defmodule App.Service.Transaction do
   defp create_transaction_pending(payload) do
     if Map.has_key?(payload, :reason) do
       Logger.info("Transaction failed: #{inspect(payload.reason)}")
-      {:error, {400, "Transaction failed: #{inspect(payload.reason)}"}}
     else
       case payload.status do
         "failed" ->
           Logger.info("Transaction failed")
-          {:error, {400, "Transaction failed"}}
 
         "review" ->
           Producer.publish_to_transactions(%{
@@ -148,7 +146,6 @@ defmodule App.Service.Transaction do
 
         _ ->
           Logger.info("Invalid status")
-          {:error, {400, "Bad Request: Invalid status"}}
       end
     end
   end

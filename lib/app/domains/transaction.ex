@@ -32,7 +32,17 @@ defmodule App.Domain.Transaction do
   @doc false
   def changeset(transaction, attrs) do
     transaction
-    |> cast(attrs, [:sender_id, :receiver_id, :amount, :currency, :hash, :status, :reason])
-    |> validate_required([:sender_id, :receiver_id, :amount, :currency, :hash, :status])
+    |> cast(attrs, [
+      :sender_id,
+      :receiver_id,
+      :amount,
+      :currency,
+      :hash,
+      :status,
+      :reason,
+      :created_at,
+      :updated_at
+    ])
+    |> validate_required([:sender_id, :receiver_id, :amount, :currency, :hash, :created_at])
   end
 end

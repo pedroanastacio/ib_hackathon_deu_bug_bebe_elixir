@@ -1,4 +1,4 @@
-defmodule CurrencyConverter do
+defmodule App.Utils.CurrencyConverter do
   @exchange_rates %{
     "USD" => Decimal.new(1),
     "BRL" => Decimal.div(Decimal.new(1), Decimal.new(5)),

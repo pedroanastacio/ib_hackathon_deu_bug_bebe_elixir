@@ -10,7 +10,14 @@ defmodule App.RabbitMQ.Connection do
       {:ok, conn} ->
         {:ok, chan} = AMQP.Channel.open(conn)
         {transactions_queue, users_queue} = declare_queues(chan)
-        {:ok, %{connection: conn, channel: chan, transactions_queue: transactions_queue, users_queue: users_queue}}
+
+        {:ok,
+         %{
+           connection: conn,
+           channel: chan,
+           transactions_queue: transactions_queue,
+           users_queue: users_queue
+         }}
 
       {:error, reason} ->
         {:stop, reason}
@@ -49,7 +56,11 @@ defmodule App.RabbitMQ.Connection do
     {:reply, {:ok, channel}, state}
   end
 
-  def handle_call(:get_queues, _from, %{transactions_queue: transactions_queue, users_queue: users_queue} = state) do
+  def handle_call(
+        :get_queues,
+        _from,
+        %{transactions_queue: transactions_queue, users_queue: users_queue} = state
+      ) do
     {:reply, {:ok, %{transactions_queue: transactions_queue, users_queue: users_queue}}, state}
   end
 end

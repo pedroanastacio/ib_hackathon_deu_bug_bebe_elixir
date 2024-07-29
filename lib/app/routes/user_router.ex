@@ -26,7 +26,7 @@ defmodule UsersRouter do
   end
 
   get "/:id" do
-    case User.get_user(id) do
+    case User.get_user_by_id(id) do
       {:ok, user} -> send_resp(conn, 200, Jason.encode!(user))
       {:error, {status, message}} -> handle_error(conn, status, message)
     end

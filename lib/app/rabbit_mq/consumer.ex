@@ -79,7 +79,7 @@ defmodule App.RabbitMQ.Consumer do
 
   defp handle_user_message(payload) do
     Logger.info("Received user message: #{inspect(payload)}")
-    # Process the user message
+    User.handle_user_queue_message(payload)
   end
 
   defp handle_transaction_message(payload) do

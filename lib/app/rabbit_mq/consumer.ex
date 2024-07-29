@@ -4,7 +4,7 @@ defmodule App.RabbitMQ.Consumer do
 
   alias AMQP.Basic
   alias App.RabbitMQ.Connection
-  alias App.Service.User
+  alias App.Service.{Transaction, User}
 
   def start_link(_) do
     GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
@@ -83,7 +83,6 @@ defmodule App.RabbitMQ.Consumer do
   end
 
   defp handle_transaction_message(payload) do
-    Logger.info("Received transaction message: #{inspect(payload)}")
-    # Process the transaction message
+    Transaction.create_transaction(payload)
   end
 end

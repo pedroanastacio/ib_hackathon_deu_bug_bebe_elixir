@@ -7,8 +7,16 @@ services:
       - '3000:3000'
     depends_on:
       - db
+      - rabbitmq
+      - codefest
     environment:
       DATABASE_URL: 'ecto://codefest:codefest@db/codefest'
+      RABBITMQ_URL: 'amqp://guest:guest@rabbitmq'
+    networks:
+      - rabbitmq_docker_network
+    restart: always
+    volumes:
+      - .:/app
 
   db:
     image: postgres:9.6
@@ -18,8 +26,43 @@ services:
       POSTGRES_USER: codefest
       POSTGRES_PASSWORD: codefest
       POSTGRES_DB: codefest
+    networks:
+      - rabbitmq_docker_network
     volumes:
       - pgdata:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+      - rabbitmq_docker_network
+    restart: always
+
+  codefest:
+    container_name: 'codefest'
+    image: leonardocbsr/codefest:latest-linux
+    environment:
+      NO_TIMEOUT: false
+      POPULATE_USERS: false
+      QUEUE_HOST: rabbitmq
+      QUEUE_PORT: 5672
+      QUEUE_USER: guest
+      QUEUE_PASS: guest
+    depends_on:
+      - rabbitmq
+    restart: always
+    networks:
+      - rabbitmq_docker_network
+
+networks:
+  rabbitmq_docker_network:
+    driver: bridge
 
 volumes:
   pgdata:

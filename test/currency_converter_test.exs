@@ -21,7 +21,8 @@ defmodule CurrencyConverterTest do
     end
 
     test "convert BRL to USD" do
-      assert {:ok, 32_866.27327837584} = CurrencyConverter.convert(164331.3663918792, "BRL", "USD")
+      assert {:ok, 32_866.27327837584} =
+               CurrencyConverter.convert(164_331.3663918792, "BRL", "USD")
     end
 
     test "convert BRL to ETH" do
@@ -53,7 +54,8 @@ defmodule CurrencyConverterTest do
     end
 
     test "convert BTC to ETH" do
-      assert {:ok, 3286627.327837584} = CurrencyConverter.convert(164331.3663918792, "BTC", "ETH")
+      assert {:ok, 3_286_627.327837584} =
+               CurrencyConverter.convert(164_331.3663918792, "BTC", "ETH")
     end
 
     test "convert BTC to IC" do
@@ -65,7 +67,7 @@ defmodule CurrencyConverterTest do
     end
 
     test "convert BTC to BRL" do
-      assert {:ok, 300000.0} = CurrencyConverter.convert(1, "BTC", "BRL")
+      assert {:ok, 300_000.0} = CurrencyConverter.convert(1, "BTC", "BRL")
     end
 
     test "convert IC to ETH" do
@@ -77,11 +79,11 @@ defmodule CurrencyConverterTest do
     end
 
     test "convert IC to USD" do
-      assert {:ok, 25500000.0} = CurrencyConverter.convert(25.5, "IC", "USD")
+      assert {:ok, 25_500_000.0} = CurrencyConverter.convert(25.5, "IC", "USD")
     end
 
     test "convert IC to BRL" do
-      assert {:ok, 127500000.0} = CurrencyConverter.convert(25.5, "IC", "BRL")
+      assert {:ok, 127_500_000.0} = CurrencyConverter.convert(25.5, "IC", "BRL")
     end
 
     test "should return an error when the source currency is not supported" do

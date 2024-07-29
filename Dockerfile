@@ -15,4 +15,4 @@ RUN mix do compile
 
 EXPOSE 3000
 
-CMD ["mix", "run", "--no-halt"]
+CMD ["mix", "run", "--no-halt", "--no-start"]

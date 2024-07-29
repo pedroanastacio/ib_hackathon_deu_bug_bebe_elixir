@@ -15,6 +15,8 @@ services:
     networks:
       - rabbitmq_docker_network
     restart: always
+    volumes:
+      - .:/app
 
   db:
     image: postgres:9.6
@@ -44,7 +46,14 @@ services:
 
   codefest:
     container_name: 'codefest'
-    image: leonardocbsr/codefest:latest
+    image: leonardocbsr/codefest:latest-linux
+    environment:
+      NO_TIMEOUT: false
+      POPULATE_USERS: false
+      QUEUE_HOST: rabbitmq
+      QUEUE_PORT: 5672
+      QUEUE_USER: guest
+      QUEUE_PASS: guest
     depends_on:
       - rabbitmq
     restart: always

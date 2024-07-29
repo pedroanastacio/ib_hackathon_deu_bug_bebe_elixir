@@ -4,6 +4,7 @@ defmodule App.RabbitMQ.Consumer do
 
   alias AMQP.Basic
   alias App.RabbitMQ.Connection
+  alias App.Service.User
 
   def start_link(_) do
     GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
@@ -14,9 +15,13 @@ defmodule App.RabbitMQ.Consumer do
       {:ok, channel} ->
         case Connection.get_queues() do
           {:ok, %{transactions_queue: transactions_queue, users_queue: users_queue}} ->
-            {:ok, _consumer_tag_transactions} = Basic.consume(channel, transactions_queue, nil, no_ack: false)
+            {:ok, _consumer_tag_transactions} =
+              Basic.consume(channel, transactions_queue, nil, no_ack: false)
+
             {:ok, _consumer_tag_users} = Basic.consume(channel, users_queue, nil, no_ack: false)
-            {:ok, %{channel: channel, transactions_queue: transactions_queue, users_queue: users_queue}}
+
+            {:ok,
+             %{channel: channel, transactions_queue: transactions_queue, users_queue: users_queue}}
 
           {:error, reason} ->
             {:stop, reason}
@@ -74,7 +79,7 @@ defmodule App.RabbitMQ.Consumer do
 
   defp handle_user_message(payload) do
     Logger.info("Received user message: #{inspect(payload)}")
-    # Process the user message
+    User.handle_user_queue_message(payload)
   end
 
   defp handle_transaction_message(payload) do

@@ -1,5 +1,5 @@
 defmodule App.Service.Transaction do
-  import Ecto.Query, only: [from: 2]
+  import Ecto.Query
   require Logger
 
   alias App.Repo
@@ -118,7 +118,99 @@ defmodule App.Service.Transaction do
   end
 
   defp create_transaction_approved(payload) do
-    Logger.info("Transaction approved: #{inspect(payload)}")
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:reduce_balance, fn repo, _changes ->
+      reduce_balance(repo, payload.sender, payload.amount)
+    end)
+    |> Ecto.Multi.run(:increase_balance, fn repo, _changes ->
+      increase_balance(repo, payload.receiver, payload.amount, payload.currency)
+    end)
+    |> Ecto.Multi.run(:register_transaction, fn repo, _changes ->
+      register_transaction(repo, payload)
+    end)
+    |> Repo.transaction()
+    |> handle_transaction_result(payload)
+  end
+
+  defp handle_transaction_result({:ok, _result}, payload) do
+    Producer.publish_to_transactions(%{
+      event: "Transaction.Created",
+      id: payload.id,
+      status: "approved",
+      updated_at: DateTime.utc_now(),
+      sender: payload.sender,
+      receiver: payload.receiver,
+      amount: payload.amount,
+      currency: payload.currency,
+      hash: payload.hash,
+      created_at: payload.created_at
+    })
+
+    {:ok, %{status: "approved"}}
+  end
+
+  defp handle_transaction_result({:error, step, reason, _changes}, payload) do
+    Logger.error("Transaction failed at step #{inspect(step)}: #{inspect(reason)}")
+    publish_failure(payload, "Transaction failed at step #{inspect(step)}: #{inspect(reason)}")
+    {:error, reason}
+  end
+
+  defp increase_balance(repo, user_id, amount, currency) do
+    user = repo.get!(User, user_id)
+
+    case CurrencyConverter.convert(amount, currency, user.currency) do
+      {:ok, converted_amount} ->
+        balance_decimal = Decimal.new(user.balance)
+        amount_decimal = Decimal.new(Float.to_string(converted_amount))
+
+        new_balance = Decimal.add(balance_decimal, amount_decimal)
+
+        user
+        |> User.changeset(%{
+          balance: new_balance
+        })
+        |> repo.update()
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  defp reduce_balance(repo, user_id, amount) do
+    user = repo.get!(User, user_id)
+
+    balance_decimal = Decimal.new(user.balance)
+    amount_decimal = Decimal.new(amount)
+
+    if Decimal.compare(balance_decimal, amount_decimal) == :lt do
+      {:error, {400, "Bad request: Insufficient balance"}}
+    else
+      new_balance = Decimal.sub(balance_decimal, amount_decimal)
+
+      case repo.update(User.changeset(user, %{balance: new_balance})) do
+        {:ok, updated_user} ->
+          {:ok, updated_user}
+
+        {:error, changeset} ->
+          {:error, {500, "Internal server error: #{inspect(changeset.errors)}"}}
+      end
+    end
+  end
+
+  defp register_transaction(repo, payload) do
+    transaction_payload = %{
+      amount: payload.amount,
+      currency: payload.currency,
+      hash: payload.hash,
+      status: "approved",
+      sender_id: payload.sender,
+      receiver_id: payload.receiver,
+      created_at: payload.created_at,
+      updated_at: payload.updated_at
+    }
+
+    changeset = Transaction.changeset(%Transaction{}, transaction_payload)
+    repo.insert(changeset)
   end
 
   defp create_transaction_pending(payload) do

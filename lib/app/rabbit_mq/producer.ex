@@ -1,16 +1,29 @@
 defmodule AppName.RabbitMQ.Producer do
   alias AppName.RabbitMQ.Connection
+  require Logger
 
-  def publish_to_users_queue(message) do
-    publish(message, "users")
+  @users_exchange "users"
+  @transactions_exchange "transactions"
+
+  def publish_to_users(channel, message) do
+    case Connection.get_channel() do
+      {:ok, channel} ->
+        AMQP.Basic.publish(channel, @users_exchange, "", message)
+        Logger.info("Published message to users queue: #{inspect(message)}")
+
+      {:error, reason} ->
+        Logger.error("Failed to get channel for publishing message: #{inspect(reason)}")
+    end
   end
 
-  def publish_to_transactions_queue(message) do
-    publish(message, "transactions")
-  end
+  def publish_to_transactions(channel, message) do
+    case Connection.get_channel() do
+      {:ok, channel} ->
+        AMQP.Basic.publish(channel, @transactions_exchange, "", message)
+        Logger.info("Published message to transactions queue: #{inspect(message)}")
 
-  defp publish(message, routing_key) do
-    {:ok, channel} = Connection.get_channel()
-    AMQP.Basic.publish(channel, "", routing_key, message)
+      {:error, reason} ->
+        Logger.error("Failed to get channel for publishing message: #{inspect(reason)}")
+    end
   end
 end

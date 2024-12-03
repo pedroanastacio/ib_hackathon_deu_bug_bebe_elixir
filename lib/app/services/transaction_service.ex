@@ -80,24 +80,38 @@ defmodule App.Service.Transaction do
 
           if user_receiver && user_sender do
             if user_sender.balance >= payload.amount do
-              id = UUID.generate()
+              is_hash_valid =
+                Hash.verify(
+                  user_sender.public_key,
+                  payload.hash,
+                  "#{payload.sender}#{payload.receiver}#{payload.amount}#{payload.created_at}#{payload.currency}"
+                )
 
-              Producer.publish_to_transactions(%{
-                event: "Transaction.Pending",
-                sender: payload.sender,
-                receiver: payload.receiver,
-                amount: payload.amount,
-                currency: payload.currency,
-                hash: payload.hash,
-                created_at: payload.created_at,
-                id: id,
-                status: "review",
-                updated_at: DateTime.utc_now().to_string()
-              })
+              Logger.info("Hash verification: #{is_hash_valid}")
 
-              Logger.info("Transaction request: #{inspect(payload)}")
+              if is_hash_valid do
+                id = UUID.generate()
 
-              {:ok, %{id: id}}
+                Producer.publish_to_transactions(%{
+                  event: "Transaction.Pending",
+                  sender: payload.sender,
+                  receiver: payload.receiver,
+                  amount: payload.amount,
+                  currency: payload.currency,
+                  hash: payload.hash,
+                  created_at: payload.created_at,
+                  id: id,
+                  status: "review",
+                  updated_at: DateTime.utc_now().to_string()
+                })
+
+                Logger.info("Transaction request: #{inspect(payload)}")
+
+                {:ok, %{id: id}}
+              else
+                publish_failure(payload, "Invalid hash")
+                {:error, {400, "Bad request: Invalid hash"}}
+              end
             else
               publish_failure(payload, "Insufficient balance")
               {:error, {400, "Bad request: Insufficient balance"}}
@@ -107,6 +121,11 @@ defmodule App.Service.Transaction do
             {:error, {404, "Sender or receiver not found"}}
           end
         rescue
+          e in ErlangError ->
+            # Extract relevant information from the ErlangError struct
+            IO.puts("An error occurred: #{inspect(e.original)}")
+            publish_failure(payload, "Internal server error")
+
           e ->
             publish_failure(payload, "Internal server error")
             {:error, {500, "Internal server error: #{e}"}}
